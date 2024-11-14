@@ -80,6 +80,6 @@ public class AuthViewModel : ViewModel<AuthWindow>
 
 	public interface IFactory
 	{
-		AuthViewModel Create(User user);
+		AuthViewModel Create(UserModel user);
 	}
 }

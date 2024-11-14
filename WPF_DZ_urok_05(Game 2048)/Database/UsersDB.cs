@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Game_2048.Helpers;
 using Game_2048.Models;
@@ -16,7 +17,14 @@ public class UsersDB : IUsersDB
 
 	public void Read()
 	{
-		Users = XmlSerializerHelper.Deserializing<List<UserModel>>(File.ReadAllText(Constants.UsersFileName));
+		try
+		{
+			Users = XmlSerializerHelper.Deserializing<List<UserModel>>(File.ReadAllText(Constants.UsersFileName));
+		}
+		catch (Exception e)
+		{
+			Users = [new UserModel()];
+		}
 	}
 
 	public void Write()

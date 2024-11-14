@@ -8,6 +8,8 @@ using Game_2048.Entities;
 using Game_2048.Enums;
 using Game_2048.Messages;
 using Game_2048.Models;
+using Game_2048_.Logic;
+using WPF_DZ_urok_05_Game_2048_.Logic;
 
 namespace Game_2048.Views.GameWindow;
 
@@ -17,6 +19,7 @@ public class GameViewModel : ViewModel<GameWindow>
 	private UserModel _user;
 	private readonly IMessenger _messenger;
 	private FieldModel _fieldModel;
+	private IGameLogic _game;
 
 	private bool isNotLeft;
 	private bool isNotUp;
@@ -33,7 +36,12 @@ public class GameViewModel : ViewModel<GameWindow>
 		set => Set(ref _user, value);
 	}
 
-	public FieldModel FieldModel
+	public IGameLogic Game
+	{
+		get => _game;
+		private set => Set(ref _game, value);
+    }
+    public FieldModel FieldModel
 	{
 		get => _fieldModel;
 		private set => Set(ref _fieldModel, value);
@@ -63,16 +71,18 @@ public class GameViewModel : ViewModel<GameWindow>
 		User = user;
 		FieldModel = new FieldModel();
 		_rnd = new Random();
+		_game = new GameLogic();
 	}
 
 	private void OnContentRendered()
 	{
-		RandomTwoAndFour();
+		Game.NewField();
+		RandomTwoAndFour(); // Вызов метода для добавленеия числа на игровое поле
 		RandomTwoAndFour();
 	}
 
-	private void RandomTwoAndFour()
-	{
+	private void RandomTwoAndFour() // метод IGameLogic для добавления числа на игровое поле
+    {
 		var newPosition = GetRandomEmptyPosition();
 
 		FieldModel.Field[newPosition.Row][newPosition.Column].Value = GetRandomValue();
@@ -93,8 +103,10 @@ public class GameViewModel : ViewModel<GameWindow>
 		return new Coordinates(row, col);
 	}
 
-	private void OnKeyboardArrow(KeyEventArgs args)
+	private void OnKeyboardArrow(KeyEventArgs args) // вызов метода для начала игры при нажатии клавиши
 	{
+		Game.PlayStep();
+
 		switch (args.Key)
 		{
 			case Key.Left:
@@ -350,14 +362,17 @@ public class GameViewModel : ViewModel<GameWindow>
 		return isLose;
 	}
 
-	private void OnExit()
+	private void OnExit() // вызов методя для выхода из игры
 	{
+		Game.Exit();
 		if (User.HighScore < CurrentScore)
 			User.HighScore = CurrentScore;
 		_messenger.Send(new RequestCloseMessage(this, null));
 	}
-	private void Restart()
+	private void Restart() // Вызов метода для рестарта игры
 	{
+		Game.Restart();
+
 		CurrentScore = 0;
 		FieldModel.Clear();
 		OnContentRendered();
